@@ -5,11 +5,16 @@
 
   <body>
     <script src="/p5.min.js"></script>
-    <script src="/intercept-p5.js"></script>
+    <script src="/p5.sound.js"></script>
     <script>
       function setup() {
       createCanvas(400, 400);
       rect(20,20,20,20);
+      osc = new p5.Oscillator();
+      osc.setType('sine');
+      osc.freq(200);
+      osc.start();
+      osc.amp(0.2);
       }
 
       function draw() {

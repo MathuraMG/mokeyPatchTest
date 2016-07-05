@@ -13,17 +13,22 @@ function test()
 
   console.log("Appending intercept p5min");
   const p5InterceptScript = document.createElement('script');
-  p5InterceptScript.src = '/intercept-p5.js';
+  p5InterceptScript.src = '/p5.sound.js';
   p5InterceptScript.async = false;
   doc.appendChild(p5InterceptScript);
   console.log("Done appending intercept p5min");
 
   console.log("Appending drawing");
   const sketchScript = document.createElement('script');
-  sketchScript.textContent = `function setup() {
+  sketchScript.textContent = `
+  function setup() {
     createCanvas(400, 400);
-    console.log("I am about to draw the  rectangle");
     rect(20,20,20,20);
+    osc = new p5.Oscillator();
+    osc.setType('sine');
+    osc.freq(200);
+    osc.start();
+    osc.amp(0.2)
   }
 
   function draw() {
