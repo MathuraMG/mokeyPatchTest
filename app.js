@@ -11,12 +11,12 @@ function test()
   doc.appendChild(p5Script);
   console.log("Done appending p5min");
 
-  console.log("Appending intercept p5min");
+  console.log("Appending p5 sound");
   const p5InterceptScript = document.createElement('script');
   p5InterceptScript.src = '/p5.sound.js';
   p5InterceptScript.async = false;
   doc.appendChild(p5InterceptScript);
-  console.log("Done appending intercept p5min");
+  console.log("Done appending p5 sound");
 
   console.log("Appending drawing");
   const sketchScript = document.createElement('script');
