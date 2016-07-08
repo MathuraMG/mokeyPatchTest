@@ -1,5 +1,10 @@
 var shadowDOMElement;
 
+const BLACKLIST = [
+  'createCanvas',
+  'color'
+];
+
 function createShadowDOMElement() {
   var c = document.getElementsByTagName('canvas')[0];
   var p = document.createElement('p');
@@ -8,26 +13,37 @@ function createShadowDOMElement() {
   shadowDOMElement = document.getElementById('shadowDOM-content');
 }
 
-function waitForElementToDisplay(selector,time) {
-  if(document.querySelector(selector)!=null) {
-		createShadowDOMElement();
-    return;
-  }
-  else {
-      setTimeout(function() {
-          waitForElementToDisplay(selector, time);
-      }, time);
-  }
-}
-waitForElementToDisplay('#defaultCanvas0');
+funcNames = refData["classitems"].map(function(x){
+  return {
+    name: x["name"],
+    params: x["params"],
+    class: x["class"]
+  };
+});
 
-var originalRect = p5.prototype.rect;
-p5.prototype.rect = function(x,y,w,h)
-{
-  originalRect.call(this,x,y,w,h);
-  if(shadowDOMElement){
-  } else {
-    createShadowDOMElement();
+
+funcNames = funcNames.filter(function(x) {
+  let className = x["class"];
+  return (x["name"] && x["params"] && (className==='p5') && (BLACKLIST.indexOf(x["name"])<0) );
+})
+
+// debugger;
+
+funcNames.forEach(function(x){
+  var originalFunc = p5.prototype[x.name];
+
+  p5.prototype[x.name] = function(){
+    originalFunc.apply(this,arguments);
+    if(!shadowDOMElement){
+      createShadowDOMElement();
+    }
+    var content= '';
+    for(var j =0;j<arguments.length;j++) {
+      content = content.concat(x.params[j].description + ' ' + arguments[j] + ' \n');
+    }
+    content = content.concat(' \n');
+    shadowDOMElement.innerHTML = shadowDOMElement.innerHTML.concat(content);
   }
-shadowDOMElement.innerHTML = shadowDOMElement.innerHTML.concat('Coordinates are - ' + x + ' ' + y + ' ' + w + ' ' + h );
-};
+
+
+});
