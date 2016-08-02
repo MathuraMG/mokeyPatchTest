@@ -1,36 +1,15 @@
 console.log('a test comment');
 var inDraw = false;
-
+var objectArray = [];
+var currentFrame = 0;
+var objectCount;
+var currentColor = '';
 var shadowDOMElement;
-// var syntax = esprima.parse('var answer = 42');
-
-var callback = function(stackframes) {
-  var stringifiedStack = stackframes.map(function(sf) {
-    // console.log(sf.functionName);
-    return sf.toString();
-  }).join('\n');
-  console.log(stringifiedStack);
-};
-var isInDraw = function(stackframes) {
-  // console.log(stackframes);
-  stringifiedStack = false;
-  stackframes.forEach(function(sf) {
-    // console.log(sf.functionName);
-    if(sf.functionName.localeCompare('draw') === 0) {
-      inDraw = true;
-    } else {
-      // inDraw = false;
-    }
-  })
-  return inDraw;
-};
-var errback = function(err) { console.log(err.message); };
-
-
 
 const BLACKLIST = [
   'createCanvas',
   'color'
+  // 'fill'
 ];
 
 function createShadowDOMElement() {
@@ -38,9 +17,15 @@ function createShadowDOMElement() {
   var c = document.getElementsByTagName('canvas')[0];
   c.setAttribute("tabIndex","0");
   c.setAttribute("role","region");
-  var p = document.createElement('p');
-  p.id = "shadowDOM-content";
-  c.appendChild(p);
+  var section = document.createElement('section');
+  section.id = "shadowDOM-content";
+  c.appendChild(section);
+  var summary = document.createElement('div');
+  summary.id = "shadowDOM-content-summary";
+  section.appendChild(summary);
+  var details = document.createElement('div');
+  details.id = "shadowDOM-content-details";
+  section.appendChild(details);
   shadowDOMElement = document.getElementById('shadowDOM-content');
 }
 
@@ -48,7 +33,8 @@ funcNames = refData["classitems"].map(function(x){
   return {
     name: x["name"],
     params: x["params"],
-    class: x["class"]
+    class: x["class"],
+    module: x["module"]
   };
 });
 
@@ -61,36 +47,53 @@ funcNames = funcNames.filter(function(x) {
 // debugger;
 
 funcNames.forEach(function(x){
-
   var originalFunc = p5.prototype[x.name];
-
   p5.prototype[x.name] = function(){
     originalFunc.apply(this,arguments);
-    // console.log( arguments);
     orgArg = arguments;
-    // StackTrace.get().then(isInDraw).catch(errback)
     if(!shadowDOMElement){
       createShadowDOMElement();
     }
-    var content= '';
-    console.log( orgArg);
-    for(var j =0;j<orgArg.length;j++) {
-      console.log('test == ' + x.params[j].description + ' ' + orgArg[j] + ' -- ');
-      content = content.concat(x.params[j].description + ' ' + orgArg[j] + ' -- ');
+    if(frameCount == 0 ) {
+      if(!x.name.localeCompare('fill')) {
+        if(arguments.length==3) {
+          var color = '#' + arguments[0].toString(16).paddingLeft("00") + arguments[1].toString(16).paddingLeft("00") + arguments[2].toString(16).paddingLeft("00");
+          var n_match  = ntc.name(color);
+          currentColor = n_match;
+        }
+      }
+      if(!x.module.localeCompare('Shape')) {
+        console.log('the object you are drawing is a - ' + x.name + ' of colour ' + currentColor +  ' of type ' + x.module);
+      }
     }
-    var tempContent = document.getElementById('shadowDOM-content').innerHTML;
-    tempContent = tempContent.split('\n');
-    content = content.concat(' \n');
-    shadowDOMElement.innerHTML = shadowDOMElement.innerHTML.concat(content);
 
-  //TODO: Implement inside this
-  var temp = StackTrace.get().then(isInDraw).then(function() {
-    if(inDraw) {
-      //TODO: Figure out what output goes in here - needs to be a bit different (??)
-      // console.log('I dont know what I am doing here!!!');
-    } else {
-    }
-  });
 
-}
+    // var content= '';
+    // for(var j =0;j<orgArg.length;j++) {
+    //   content = content.concat(x.params[j].description + ' ' + orgArg[j] + ' -- ');
+    // }
+    // var tempContent = document.getElementById('shadowDOM-content').innerHTML;
+    // tempContent = tempContent.split('\n');
+    // content = content.concat(' \n');
+    // shadowDOMElement.innerHTML = shadowDOMElement.innerHTML.concat(content);
+  }
 });
+
+String.prototype.paddingLeft = function (paddingValue) {
+   return String(paddingValue + this).slice(-paddingValue.length);
+};
+
+/*** PSUEDO CODE
+
+* Run @fc = 0
+* make a list of all the objects/shapes that are present - make a list of the objects using data.json
+* check if the same ones are present in fc=1 ??
+* and update the content
+
+*Caveats
+- if there is already a circle, we can actually update the values on the same one if there is the SAME number of circles.
+-else we can update the SAME ones and add the rest
+
+links
+- Color converter -   http://chir.ag/projects/ntc/
+***/
