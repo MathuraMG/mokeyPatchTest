@@ -5,6 +5,7 @@ var currentFrame = 0;
 var objectCount;
 var currentColor = '';
 var shadowDOMElement;
+var canvasLocation ='';
 
 const BLACKLIST = [
   'createCanvas',
@@ -59,11 +60,13 @@ funcNames.forEach(function(x){
         if(arguments.length==3) {
           var color = '#' + arguments[0].toString(16).paddingLeft("00") + arguments[1].toString(16).paddingLeft("00") + arguments[2].toString(16).paddingLeft("00");
           var n_match  = ntc.name(color);
-          currentColor = n_match;
+          currentColor = n_match[1];
         }
       }
       if(!x.module.localeCompare('Shape')) {
         console.log('the object you are drawing is a - ' + x.name + ' of colour ' + currentColor +  ' of type ' + x.module);
+        var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
+        console.log('the object starts in the ' + canvasLocation +  ' of the canvas.');
       }
     }
 
@@ -82,6 +85,42 @@ funcNames.forEach(function(x){
 String.prototype.paddingLeft = function (paddingValue) {
    return String(paddingValue + this).slice(-paddingValue.length);
 };
+
+function canvasLocator(x,y,canvasX,canvasY) {
+  if(x<0.35*canvasX) {
+    if(y<0.35*canvasY) {
+      return 'top left';
+    }
+    else if(y>0.7*canvasY) {
+      return 'bottom left';
+    }
+    else {
+      return 'mid left';
+    }
+  }
+  else if(x>0.7*canvasX) {
+    if(y<0.35*canvasY) {
+      return 'top right';
+    }
+    else if(y>0.7*canvasY) {
+      return 'bottom right';
+    }
+    else {
+      return 'mid right';
+    }
+  }
+  else {
+    if(y<0.35*canvasY) {
+      return 'top middle';
+    }
+    else if(y>0.7*canvasY) {
+      return 'bottom middle';
+    }
+    else {
+      return 'middle';
+    }
+  }
+}
 
 /*** PSUEDO CODE
 

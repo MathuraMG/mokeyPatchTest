@@ -1,7 +1,7 @@
 // CODE 1
 
 function setup() {
-  createCanvas(400, 400);background(220);
+  createCanvas(420, 430);background(220);
 	fill(255, 0, 0);
 	ellipse(80, 50, 80, 80);
 	fill(0, 255, 255);
