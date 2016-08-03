@@ -2,7 +2,7 @@ console.log('a test comment');
 var inDraw = false;
 var objectArray = [];
 var currentFrame = 0;
-var objectCount;
+var objectCount = 0;
 var currentColor = '';
 var shadowDOMElement;
 var canvasLocation ='';
@@ -55,7 +55,7 @@ funcNames.forEach(function(x){
     if(!shadowDOMElement){
       createShadowDOMElement();
     }
-    if(frameCount == 0 ) {
+    if(frameCount%100 == 0 ) {
       if(!x.name.localeCompare('fill')) {
         if(arguments.length==3) {
           var color = '#' + arguments[0].toString(16).paddingLeft("00") + arguments[1].toString(16).paddingLeft("00") + arguments[2].toString(16).paddingLeft("00");
@@ -67,7 +67,12 @@ funcNames.forEach(function(x){
         console.log('the object you are drawing is a - ' + x.name + ' of colour ' + currentColor +  ' of type ' + x.module);
         var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
         console.log('the object starts in the ' + canvasLocation +  ' of the canvas.');
+        objectCount++;
       }
+    }
+    if(frameCount%100 == 1 ) {
+      console.log('the total number of objects is - ' + objectCount);
+      objectCount =0;
     }
 
 
