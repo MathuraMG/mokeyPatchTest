@@ -14,7 +14,7 @@ function setup() {
 
 function draw() {
   // fill(255,255,255);
-  // rect(10,10,40,20);
+   rect(10,10,40,20);
 }
 
 // CODE 2
