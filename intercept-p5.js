@@ -27,7 +27,8 @@ const BLACKLIST = [
 
 function createShadowDOMElement() {
 
-  var c = document.getElementsByTagName('canvas')[0];
+  // var c = document.getElementsByTagName('canvas')[0];
+  var c = document.getElementById('canvas-sub');
   c.setAttribute("tabIndex","0");
   c.setAttribute("role","region");
   var section = document.createElement('section');
@@ -45,14 +46,10 @@ function createShadowDOMElement() {
   section.appendChild(details);
   var setupTable = document.createElement('table');
   setupTable.id="shadowDOM-content-details-setup";
-  var setupTableCaption = document.createElement('caption');
-  setupTableCaption.innerHTML = "details of object in setup";
-  setupTable.appendChild(setupTableCaption);
+  setupTable.setAttribute('summary','details of object in setup');
   var drawTable = document.createElement('table');
   drawTable.id="shadowDOM-content-details-draw";
-  var drawTableCaption = document.createElement('caption');
-  drawTableCaption.innerHTML = "details of object in draw";
-  drawTable.appendChild(drawTableCaption);
+  drawTable.setAttribute('summary','details of object in draw');
   details.appendChild(setupTable);
   details.appendChild(drawTable);
   shadowDOMElement = document.getElementById('shadowDOM-content');
@@ -82,6 +79,7 @@ funcNames.forEach(function(x){
     if(!shadowDOMElement){
       createShadowDOMElement();
     }
+
     if(frameCount == 0) { //for setup
       if(!x.name.localeCompare('fill')) {
         currentColor = getColorName(arguments);
@@ -113,6 +111,7 @@ funcNames.forEach(function(x){
         setupObjectCount++;
       }
     }
+
     else if( frameCount == 1) { //first loop of draw
       console.log('setup object details - ');
       console.log(setupObjectCount);
@@ -131,14 +130,19 @@ funcNames.forEach(function(x){
       }
       objectCount++;
     }
+
     else if(frameCount%100 == 0 ) {
-      tempObjectTypeCount = {};
-      tempObjectCount = 0;
+
       if(!x.name.localeCompare('fill')) {
         currentColor = getColorName(arguments);
       }
       else if(!x.module.localeCompare('Shape')) {
+        if(tempObjectCount==0) {
 
+          var table = document.getElementById('shadowDOM-content-details-draw');
+          table.innerHTML = '';
+        }
+        var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
         tempObjectArray[tempObjectCount] = {
           'type' : x.name,
           'arguments': arguments,
@@ -150,7 +154,19 @@ funcNames.forEach(function(x){
         else {
           tempObjectTypeCount[x.name]=1;
         }
+        var table = document.getElementById('shadowDOM-content-details-draw');
+        var row = document.createElement('tr');
+        var type = document.createElement('td');
+        type.innerHTML = x.name;
+        row.appendChild(type);
+        var location = document.createElement('td');
+        location.innerHTML = canvasLocation;
+        row.appendChild(location);
+        table.appendChild(row);
+
         tempObjectCount++;
+
+
 
         // if((!x.name.localeCompare(objectArray[tempObjectCount-1]['type']))&&(arguments.equals(objectArray[tempObjectCount]['arguments']))) {
         //   //the object is the same. Move on.
@@ -175,6 +191,7 @@ funcNames.forEach(function(x){
       }
     }
     else if(frameCount%100 == 1 ) {
+
       console.log(frameCount);
       objectCount = tempObjectCount;
 
@@ -182,6 +199,9 @@ funcNames.forEach(function(x){
       console.log(tempObjectCount);
       console.log(tempObjectArray);
       console.log(tempObjectTypeCount);
+
+      tempObjectTypeCount = {};
+      tempObjectCount = 0;
     }
 
     // var content= '';
