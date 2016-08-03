@@ -4,16 +4,17 @@ function setup() {
   createCanvas(420, 430);background(220);
 	fill(255, 0, 0);
 	ellipse(80, 50, 80, 80);
-	fill(0, 255, 255);
+	fill('blue');
 	rect(150, 100, 50, 50);
+  fill('#3243ff');
   ellipse(250, 100, 50, 50);
-	fill(0, 0, 255);
+	fill(200);
 	triangle(200, 200, 150, 350, 250, 350);
 }
 
 function draw() {
-  fill(255,255,255);
-  rect(10,10,40,20);
+  // fill(255,255,255);
+  // rect(10,10,40,20);
 }
 
 // CODE 2
