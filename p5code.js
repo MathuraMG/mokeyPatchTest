@@ -1,46 +1,42 @@
-// // CODE 1
-//
-// function setup() {
-//   createCanvas(400, 400);
-// }
-//
-// function draw() {
-//   background(220);
-// 	fill(255, 0, 0);
-// 	ellipse(80, 50, 80, 80);
-// 	fill(0, 255, 0);
-// 	rect(150, 100, 50, 50);
-// 	fill(200, 123, 255);
-// 	triangle(200, 200, 150, 350, 250, 350);
-// }
-
-
-// CODE 2
-var x = 0;
-var y = 0;
-var xspeed = 1;
-var yspeed = 1;
-
+// CODE 1
 
 function setup() {
-createCanvas(400,400);
+  createCanvas(400, 400);
 }
 
 function draw() {
-	background (20, 190, 90);
-  	fill (0);
-  	ellipse (x, y, 40, 40);
- 	 x = x + xspeed;
-  	 if (x > windowWidth-200 || x < 0)  {
-     	xspeed = -xspeed;
-  	}
-  	y = y + yspeed;
-  	if (y > windowHeight-140 || y < 0) {
-	 	  yspeed = -yspeed;
-  	}
+  background(220);
+	fill(255, 0, 0);
+	ellipse(80, 50, 80, 80);
+	fill(0, 255, 0);
+	rect(150, 100, 50, 50);
+	fill(0, 0, 255);
+	triangle(200, 200, 150, 350, 250, 350);
 }
 
 
+// CODE 2
+
+// function setup() {
+//   createCanvas(400, 400);
+// 	background(250, 220, 40);
+//   // fill(255, 0, 0);
+//   ellipse(80, 50, 80, 80);
+//   // fill(0);
+//   text("Howdy!", 60, 55);
+//   // fill(0, 255, 0);
+//   rect(150, 100, 50, 50);
+//   // fill(0);
+//   text("Howdy!", 155, 130);
+//   // fill(0, 0, 255);
+//   triangle(200, 200, 150, 350, 250, 350);
+//   // fill(255);
+//   text("Howdy!", 180, 300);
+// }
+//
+// function draw() {
+//
+// }
 
 //CODE 3
 
