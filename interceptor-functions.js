@@ -13,10 +13,10 @@ function getColorName(arguments) {
     if(!(typeof(arguments[0])).localeCompare("number")) {
       //assuming that we are doing RGB - this would be a grayscale number
       if(arguments[0]<10) {
-        return 'white';
+        return 'black';
       }
       else if(arguments[0]>240) {
-        return 'black';
+        return 'white';
       }
       else {
         return 'grey';

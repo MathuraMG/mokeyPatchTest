@@ -1,7 +1,7 @@
-console.log('a test comment');
+// console.log('a test comment');
 var inDraw = false;
 var currentFrame = 0;
-var currentColor = '';
+var currentColor = 'white';
 var shadowDOMElement;
 var canvasLocation ='';
 
@@ -85,14 +85,17 @@ funcNames.forEach(function(x){
         currentColor = getColorName(arguments);
       }
       else if(!x.module.localeCompare('Shape')) {
-        console.log('the object you are drawing is a - ' + x.name + ' of colour ' + currentColor +  ' of type ' + x.module);
+        // console.log('the object you are drawing is a - ' + x.name + ' of colour ' + currentColor +  ' of type ' + x.module);
         var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
-        console.log('the object starts in the ' + canvasLocation +  ' of the canvas.');
+        // console.log('the object starts in the ' + canvasLocation +  ' of the canvas.');
         setupObjectArray[setupObjectCount] = {
           'type' : x.name,
-          'arguments': arguments,
-          'location': canvasLocation
+          'location': canvasLocation,
+          'colour': currentColor
         };
+        for(var i=0;i<arguments.length;i++) {
+          setupObjectArray[setupObjectCount][x.params[i].name]=arguments[i];
+        }
         if(setupObjectTypeCount[x.name]) {
           setupObjectTypeCount[x.name]++;
         }
@@ -101,34 +104,15 @@ funcNames.forEach(function(x){
         }
         var table = document.getElementById('shadowDOM-content-details-setup');
         var row = document.createElement('tr');
-        var type = document.createElement('td');
-        type.innerHTML = x.name;
-        row.appendChild(type);
-        var location = document.createElement('td');
-        location.innerHTML = canvasLocation;
-        row.appendChild(location);
+        var properties =  Object.keys(setupObjectArray[setupObjectCount]);
+        for(var i =0;i<properties.length;i++) {
+          var col = document.createElement('td');
+          col.innerHTML = properties[i] + ' : ' + setupObjectArray[setupObjectCount][properties[i]];
+          row.appendChild(col);
+        }
         table.appendChild(row);
         setupObjectCount++;
       }
-    }
-
-    else if( frameCount == 1) { //first loop of draw
-      console.log('setup object details - ');
-      console.log(setupObjectCount);
-      console.log(setupObjectTypeCount);
-      console.log(setupObjectArray);
-      objectArray[objectCount] = {
-        'type' : x.name,
-        'arguments': arguments,
-        'location': canvasLocation
-      };
-      if(objectTypeCount[x.name]) {
-        objectTypeCount[x.name]++;
-      }
-      else {
-        objectTypeCount[x.name]=1;
-      }
-      objectCount++;
     }
 
     else if(frameCount%100 == 0 ) {
@@ -145,9 +129,12 @@ funcNames.forEach(function(x){
         var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
         tempObjectArray[tempObjectCount] = {
           'type' : x.name,
-          'arguments': arguments,
-          'location': canvasLocation
+          'location': canvasLocation,
+          'colour': currentColor
         };
+        for(var i=0;i<arguments.length;i++) {
+          tempObjectArray[tempObjectCount][x.params[i].name]=arguments[i];
+        }
         if(tempObjectTypeCount[x.name]) {
           tempObjectTypeCount[x.name]++;
         }
@@ -156,62 +143,22 @@ funcNames.forEach(function(x){
         }
         var table = document.getElementById('shadowDOM-content-details-draw');
         var row = document.createElement('tr');
-        var type = document.createElement('td');
-        type.innerHTML = x.name;
-        row.appendChild(type);
-        var location = document.createElement('td');
-        location.innerHTML = canvasLocation;
-        row.appendChild(location);
+        var properties =  Object.keys(tempObjectArray[tempObjectCount]);
+        for(var i =0;i<properties.length;i++) {
+          var col = document.createElement('td');
+          col.innerHTML = properties[i] + ' : ' + tempObjectArray[tempObjectCount][properties[i]];
+          row.appendChild(col);
+        }
         table.appendChild(row);
-
         tempObjectCount++;
-
-
-
-        // if((!x.name.localeCompare(objectArray[tempObjectCount-1]['type']))&&(arguments.equals(objectArray[tempObjectCount]['arguments']))) {
-        //   //the object is the same. Move on.
-        // }
-        // else if((!x.name.localeCompare(objectArray[tempObjectCount]['type']))) {
-        //   //TODO : How to diff the object?
-        // }
-        // else {
-        //   objectArray[tempObjectCount] = {
-        //     'type' : x.name,
-        //     'arguments': arguments
-        //   };
-        //   if(tempObjectTypeCount[x.name]) {
-        //     tempObjectTypeCount[x.name]++;
-        //   }
-        //   else {
-        //     tempObjectTypeCount[x.name]=1;
-        //   }
-        //   tempObjectCount++;
-        // }
-        // tempObjectCount++;
       }
     }
+    //reset some of the variables
     else if(frameCount%100 == 1 ) {
-
-      console.log(frameCount);
       objectCount = tempObjectCount;
-
-      console.log('the total number of objects drawn in previous frame is - ' + tempObjectCount);
-      console.log(tempObjectCount);
-      console.log(tempObjectArray);
-      console.log(tempObjectTypeCount);
-
       tempObjectTypeCount = {};
       tempObjectCount = 0;
     }
-
-    // var content= '';
-    // for(var j =0;j<orgArg.length;j++) {
-    //   content = content.concat(x.params[j].description + ' ' + orgArg[j] + ' -- ');
-    // }
-    // var tempContent = document.getElementById('shadowDOM-content').innerHTML;
-    // tempContent = tempContent.split('\n');
-    // content = content.concat(' \n');
-    // shadowDOMElement.innerHTML = shadowDOMElement.innerHTML.concat(content);
   }
 });
 
