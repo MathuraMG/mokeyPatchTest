@@ -21,39 +21,11 @@ var setupObjectCount = 0;
 var setupObjectTypeCount = {};
 const BLACKLIST = [
   'createCanvas',
-  'color'
+  'color',
+  'text'
   // 'fill'
 ];
 
-function createShadowDOMElement() {
-
-  // var c = document.getElementsByTagName('canvas')[0];
-  var c = document.getElementById('canvas-sub');
-  c.setAttribute("tabIndex","0");
-  c.setAttribute("role","region");
-  var section = document.createElement('section');
-  section.id = "shadowDOM-content";
-  c.appendChild(section);
-  var summary = document.createElement('div');
-  summary.setAttribute("tabIndex","0");
-  summary.setAttribute("role","region");
-  summary.id = "shadowDOM-content-summary";
-  section.appendChild(summary);
-  var details = document.createElement('div');
-  details.setAttribute("tabIndex","0");
-  details.setAttribute("role","region");
-  details.id = "shadowDOM-content-details";
-  section.appendChild(details);
-  var setupTable = document.createElement('table');
-  setupTable.id="shadowDOM-content-details-setup";
-  setupTable.setAttribute('summary','details of object in setup');
-  var drawTable = document.createElement('table');
-  drawTable.id="shadowDOM-content-details-draw";
-  drawTable.setAttribute('summary','details of object in draw');
-  details.appendChild(setupTable);
-  details.appendChild(drawTable);
-  shadowDOMElement = document.getElementById('shadowDOM-content');
-}
 
 funcNames = refData["classitems"].map(function(x){
   return {
@@ -69,7 +41,6 @@ funcNames = funcNames.filter(function(x) {
   return (x["name"] && x["params"] && (className==='p5') && (BLACKLIST.indexOf(x["name"])<0) );
 })
 
-// debugger;
 
 funcNames.forEach(function(x){
   var originalFunc = p5.prototype[x.name];
@@ -116,7 +87,6 @@ funcNames.forEach(function(x){
     }
 
     else if(frameCount%100 == 0 ) {
-
       if(!x.name.localeCompare('fill')) {
         currentColor = getColorName(arguments);
       }
@@ -155,9 +125,19 @@ funcNames.forEach(function(x){
     }
     //reset some of the variables
     else if(frameCount%100 == 1 ) {
-      objectCount = tempObjectCount;
-      tempObjectTypeCount = {};
-      tempObjectCount = 0;
+      if(tempObjectCount>0) {
+        var overview = document.getElementById('shadowDOM-content-summary');
+        var totalCount = tempObjectCount + setupObjectCount;
+        overview.innerHTML = 'This canvas contains ' + totalCount + ' shapes. The shapes are ';
+        totObjectTypeCount = MergeObjRecursive(tempObjectTypeCount, setupObjectTypeCount);
+        var keys = Object.keys(totObjectTypeCount);
+        for(var i=0;i<keys.length;i++) {
+          overview.innerHTML = overview.innerHTML.concat( tempObjectTypeCount[keys[i]] + ' ' + keys[i] + ' ');
+        }
+      }
+
+        tempObjectTypeCount = {};
+        tempObjectCount = 0;
     }
   }
 });

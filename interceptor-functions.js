@@ -2,6 +2,36 @@ String.prototype.paddingLeft = function (paddingValue) {
    return String(paddingValue + this).slice(-paddingValue.length);
 };
 
+function createShadowDOMElement() {
+
+  // var c = document.getElementsByTagName('canvas')[0];
+  var c = document.getElementById('canvas-sub');
+  c.setAttribute("tabIndex","0");
+  c.setAttribute("role","region");
+  var section = document.createElement('section');
+  section.id = "shadowDOM-content";
+  c.appendChild(section);
+  var summary = document.createElement('div');
+  summary.setAttribute("tabIndex","0");
+  summary.setAttribute("role","region");
+  summary.id = "shadowDOM-content-summary";
+  section.appendChild(summary);
+  var details = document.createElement('div');
+  details.setAttribute("tabIndex","0");
+  details.setAttribute("role","region");
+  details.id = "shadowDOM-content-details";
+  section.appendChild(details);
+  var setupTable = document.createElement('table');
+  setupTable.id="shadowDOM-content-details-setup";
+  setupTable.setAttribute('summary','details of object in setup');
+  var drawTable = document.createElement('table');
+  drawTable.id="shadowDOM-content-details-draw";
+  drawTable.setAttribute('summary','details of object in draw');
+  details.appendChild(setupTable);
+  details.appendChild(drawTable);
+  shadowDOMElement = document.getElementById('shadowDOM-content');
+}
+
 function getColorName(arguments) {
   if(arguments.length==3) {
     //assuming that we are doing RGB - convert RGB values to a name
@@ -99,3 +129,15 @@ Array.prototype.equals = function (array) {
 }
 // Hide method from for-in loops
 Object.defineProperty(Array.prototype, "equals", {enumerable: false});
+
+function MergeObjRecursive(obj1, obj2) {
+  for(p in obj2) {
+    if(Object.keys(obj1).indexOf(p)<0){
+      obj1[p] = obj2[p];
+    }
+    else {
+      obj1[p] = obj1[p] + obj2[p];
+    }
+  }
+  return obj1;
+}
