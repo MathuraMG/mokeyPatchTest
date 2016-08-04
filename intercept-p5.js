@@ -64,6 +64,9 @@ funcNames.forEach(function(x){
           'colour': currentColor
         };
         for(var i=0;i<arguments.length;i++) {
+          if(!(typeof(arguments[i])).localeCompare('number')){
+            arguments[i] = round(arguments[i]);
+          }
           setupObjectArray[setupObjectCount][x.params[i].name]=arguments[i];
         }
         if(setupObjectTypeCount[x.name]) {
@@ -102,6 +105,9 @@ funcNames.forEach(function(x){
           'colour': currentColor
         };
         for(var i=0;i<arguments.length;i++) {
+          if(!(typeof(arguments[i])).localeCompare('number')){
+            arguments[i] = round(arguments[i]);
+          }
           tempObjectArray[tempObjectCount][x.params[i].name]=arguments[i];
         }
         if(tempObjectTypeCount[x.name]) {
