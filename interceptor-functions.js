@@ -71,22 +71,22 @@ function getColorName(arguments) {
 }
 
 function canvasLocator(x,y,canvasX,canvasY) {
-  if(x<0.35*canvasX) {
-    if(y<0.35*canvasY) {
+  if(x<0.4*canvasX) {
+    if(y<0.4*canvasY) {
       return 'top left';
     }
-    else if(y>0.7*canvasY) {
+    else if(y>0.8*canvasY) {
       return 'bottom left';
     }
     else {
       return 'mid left';
     }
   }
-  else if(x>0.7*canvasX) {
-    if(y<0.35*canvasY) {
+  else if(x>0.8*canvasX) {
+    if(y<0.4*canvasY) {
       return 'top right';
     }
-    else if(y>0.7*canvasY) {
+    else if(y>0.8*canvasY) {
       return 'bottom right';
     }
     else {
@@ -94,10 +94,10 @@ function canvasLocator(x,y,canvasX,canvasY) {
     }
   }
   else {
-    if(y<0.35*canvasY) {
+    if(y<0.4*canvasY) {
       return 'top middle';
     }
-    else if(y>0.7*canvasY) {
+    else if(y>0.8*canvasY) {
       return 'bottom middle';
     }
     else {

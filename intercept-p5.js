@@ -21,8 +21,8 @@ var setupObjectCount = 0;
 var setupObjectTypeCount = {};
 const BLACKLIST = [
   'createCanvas',
-  'color',
-  'text'
+  'color'
+  // 'text'
   // 'fill'
 ];
 
@@ -32,7 +32,8 @@ funcNames = refData["classitems"].map(function(x){
     name: x["name"],
     params: x["params"],
     class: x["class"],
-    module: x["module"]
+    module: x["module"],
+    submodule: x["submodule"]
   };
 });
 
@@ -54,9 +55,14 @@ funcNames.forEach(function(x){
       if(!x.name.localeCompare('fill')) {
         currentColor = getColorName(arguments);
       }
-      else if(!x.module.localeCompare('Shape')) {
+      else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
         // console.log('the object you are drawing is a - ' + x.name + ' of colour ' + currentColor +  ' of type ' + x.module);
-        var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
+        if(!x.module.localeCompare('Typography')) {
+          var canvasLocation = canvasLocator(arguments[1], arguments[2],width,height);
+        } else {
+          var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
+        }
+
         // console.log('the object starts in the ' + canvasLocation +  ' of the canvas.');
         setupObjectArray[setupObjectCount] = {
           'type' : x.name,
@@ -67,7 +73,7 @@ funcNames.forEach(function(x){
           if(!(typeof(arguments[i])).localeCompare('number')){
             arguments[i] = round(arguments[i]);
           }
-          setupObjectArray[setupObjectCount][x.params[i].name]=arguments[i];
+          setupObjectArray[setupObjectCount][x.params[i].description]=arguments[i];
         }
         if(setupObjectTypeCount[x.name]) {
           setupObjectTypeCount[x.name]++;
@@ -92,13 +98,18 @@ funcNames.forEach(function(x){
       if(!x.name.localeCompare('fill')) {
         currentColor = getColorName(arguments);
       }
-      else if(!x.module.localeCompare('Shape')) {
+      else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
+
         if(tempObjectCount==0) {
 
           var table = document.getElementById('shadowDOM-content-details-draw');
           table.innerHTML = '';
         }
-        var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
+        if(!x.module.localeCompare('Typography')) {
+          var canvasLocation = canvasLocator(arguments[1], arguments[2],width,height);
+        } else {
+          var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
+        }
         tempObjectArray[tempObjectCount] = {
           'type' : x.name,
           'location': canvasLocation,
@@ -108,7 +119,7 @@ funcNames.forEach(function(x){
           if(!(typeof(arguments[i])).localeCompare('number')){
             arguments[i] = round(arguments[i]);
           }
-          tempObjectArray[tempObjectCount][x.params[i].name]=arguments[i];
+          tempObjectArray[tempObjectCount][x.params[i].description]=arguments[i];
         }
         if(tempObjectTypeCount[x.name]) {
           tempObjectTypeCount[x.name]++;
