@@ -45,7 +45,6 @@ funcNames = funcNames.filter(function(x) {
 funcNames.forEach(function(x){
   var originalFunc = p5.prototype[x.name];
   p5.prototype[x.name] = function(){
-    originalFunc.apply(this,arguments);
     orgArg = arguments;
     if(!shadowDOMElement){
       createShadowDOMElement();
@@ -139,6 +138,7 @@ funcNames.forEach(function(x){
         tempObjectTypeCount = {};
         tempObjectCount = 0;
     }
+    return originalFunc.apply(this,arguments);
   }
 });
 
