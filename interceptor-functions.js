@@ -136,13 +136,89 @@ Array.prototype.equals = function (array) {
 Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
 function MergeObjRecursive(obj1, obj2) {
+  var obj3 = {};
+  for(p in obj1) {
+    obj3[p] = obj1[p];
+  }
   for(p in obj2) {
-    if(Object.keys(obj1).indexOf(p)<0){
-      obj1[p] = obj2[p];
+    if(Object.keys(obj3).indexOf(p)<0){
+      obj3[p] = obj2[p];
     }
     else {
-      obj1[p] = obj1[p] + obj2[p];
+      obj3[p] = obj3[p] + obj2[p];
     }
   }
-  return obj1;
+  return obj3;
+}
+
+function populateTable(x,arguments, object ,table, isDraw) {
+  objectCount = object.objectCount;
+  objectArray = object.objectArray;
+  objectTypeCount = object.objectTypeCount;
+  if(isDraw && objectCount < 1) {
+    table.innerHTML = ''
+  };
+  if(!x.name.localeCompare('fill')) {
+    currentColor = getColorName(arguments);
+  }
+  else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
+
+  if(!x.module.localeCompare('Typography')) {
+      var canvasLocation = canvasLocator(arguments[1], arguments[2],width,height);
+    } else {
+      var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
+    }
+
+
+  objectArray[objectCount] = {
+      'type' : x.name,
+      'location': canvasLocation,
+      'colour': currentColor
+    };
+
+    for(var i=0;i<arguments.length;i++) {
+      if(!(typeof(arguments[i])).localeCompare('number')){
+        arguments[i] = round(arguments[i]);
+      }
+      objectArray[objectCount][x.params[i].description]=arguments[i];
+    }
+    if(objectTypeCount[x.name]) {
+      objectTypeCount[x.name]++;
+    }
+    else {
+      objectTypeCount[x.name]=1;
+    }
+    var row = document.createElement('tr');
+    var properties =  Object.keys(objectArray[objectCount]);
+    for(var i =0;i<properties.length;i++) {
+      var col = document.createElement('td');
+      col.innerHTML = properties[i] + ' : ' + objectArray[objectCount][properties[i]];
+      row.appendChild(col);
+    }
+    table.appendChild(row);
+    objectCount++;
+  }
+  return ({
+    objectCount : objectCount,
+    objectArray : objectArray,
+    objectTypeCount : objectTypeCount
+  });
+}
+
+function getSummary(object1, object2, element) {
+  if(object2.objectCount>0) {
+    var totalCount = object1.objectCount + object2.objectCount;
+    element.innerHTML = 'This canvas contains ' + totalCount + ' shapes. The shapes are ';
+    totObjectTypeCount = MergeObjRecursive(object1.objectTypeCount, object2.objectTypeCount);
+    var keys = Object.keys(totObjectTypeCount);
+    for(var i=0;i<keys.length;i++) {
+      element.innerHTML = element.innerHTML.concat( totObjectTypeCount[keys[i]] + ' ' + keys[i] + ' ');
+    }
+  }
+}
+
+function clearVariables(object) {
+  object.objectTypeCount = {};
+  object.objectCount = 0;
+  return object;
 }

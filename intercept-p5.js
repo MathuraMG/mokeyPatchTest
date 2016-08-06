@@ -4,17 +4,17 @@ var currentColor = 'white';
 var shadowDOMElement;
 var canvasLocation ='';
 
-//temp variables for objects(??)
-var drawObject = {};
-var drawObjectArray = [];
-var drawObjectCount = 0;
-var drawObjectTypeCount = {};
-
 //for object in setpu (??)
-var setupObject = {};
-var setupObjectArray = [];
-var setupObjectCount = 0;
-var setupObjectTypeCount = {};
+var setupObject = {
+  objectArray : [],
+  objectCount : 0,
+  objectTypeCount : {}
+};
+var drawObject = {
+  objectArray : [],
+  objectCount : 0,
+  objectTypeCount : {}
+};
 
 funcNames = refData["classitems"].map(function(x){
   return {
@@ -41,88 +41,22 @@ funcNames.forEach(function(x){
     }
 
     if(frameCount == 0) { //for setup
-      setupObject = populateTable(x,arguments, setupObjectCount,setupObjectArray, setupObjectTypeCount,  document.getElementById('shadowDOM-content-details-setup'),false)
-      setupObjectCount = setupObject.objectCount;
-      setupObjectArray = setupObject.objectArray;
-      setupObjectTypeCount = setupObject.objectTypeCount;
+      setupObject = populateTable(x,arguments, setupObject,  document.getElementById('shadowDOM-content-details-setup'),false)
     }
 
     else if(frameCount%100 == 0 ) {
-      drawObject = populateTable(x,arguments, drawObjectCount,drawObjectArray, drawObjectTypeCount, document.getElementById('shadowDOM-content-details-draw'),true)
-      drawObjectCount = drawObject.objectCount;
-      drawObjectArray = drawObject.objectArray;
-      drawObjectTypeCount = drawObject.objectTypeCount;
+      drawObject = populateTable(x,arguments, drawObject, document.getElementById('shadowDOM-content-details-draw'),true)
     }
     //reset some of the variables
     else if(frameCount%100 == 1 ) {
-      if(drawObjectCount>0) {
-        var overview = document.getElementById('shadowDOM-content-summary');
-        var totalCount = drawObjectCount + setupObjectCount;
-        overview.innerHTML = 'This canvas contains ' + totalCount + ' shapes. The shapes are ';
-        totObjectTypeCount = MergeObjRecursive(drawObjectTypeCount, setupObjectTypeCount);
-        var keys = Object.keys(totObjectTypeCount);
-        for(var i=0;i<keys.length;i++) {
-          overview.innerHTML = overview.innerHTML.concat( drawObjectTypeCount[keys[i]] + ' ' + keys[i] + ' ');
-        }
-      }
-        drawObjectTypeCount = {};
-        drawObjectCount = 0;
+      getSummary(setupObject,drawObject,document.getElementById('shadowDOM-content-summary'));
+      // drawObject = clearVariables(drawObject);
+      drawObject.objectTypeCount = {};
+      drawObject.objectCount = 0;
     }
     return originalFunc.apply(this,arguments);
   }
 });
-
-function populateTable(x,arguments, objectCount,objectArray, objectTypeCount,table, isDraw) {
-
-  if(isDraw && objectCount < 1) {
-    table.innerHTML = ''
-  };
-  if(!x.name.localeCompare('fill')) {
-    currentColor = getColorName(arguments);
-  }
-  else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
-
-  if(!x.module.localeCompare('Typography')) {
-      var canvasLocation = canvasLocator(arguments[1], arguments[2],width,height);
-    } else {
-      var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
-    }
-
-
-  objectArray[objectCount] = {
-      'type' : x.name,
-      'location': canvasLocation,
-      'colour': currentColor
-    };
-
-    for(var i=0;i<arguments.length;i++) {
-      if(!(typeof(arguments[i])).localeCompare('number')){
-        arguments[i] = round(arguments[i]);
-      }
-      objectArray[objectCount][x.params[i].description]=arguments[i];
-    }
-    if(objectTypeCount[x.name]) {
-      objectTypeCount[x.name]++;
-    }
-    else {
-      objectTypeCount[x.name]=1;
-    }
-    var row = document.createElement('tr');
-    var properties =  Object.keys(objectArray[objectCount]);
-    for(var i =0;i<properties.length;i++) {
-      var col = document.createElement('td');
-      col.innerHTML = properties[i] + ' : ' + objectArray[objectCount][properties[i]];
-      row.appendChild(col);
-    }
-    table.appendChild(row);
-    objectCount++;
-  }
-  return ({
-    'objectCount' : objectCount,
-    'objectArray' : objectArray,
-    'objectTypeCount' : objectTypeCount
-  });
-}
 
 /*** PSUEDO CODE
 
