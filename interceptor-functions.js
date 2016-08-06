@@ -1,3 +1,11 @@
+var inDraw = false;
+var currentFrame = 0;
+var currentColor = 'white';
+var bgColor = 'white';
+var canvasDetails = {
+  width : 0,
+  height: 0
+};
 String.prototype.paddingLeft = function (paddingValue) {
    return String(paddingValue + this).slice(-paddingValue.length);
 };
@@ -70,23 +78,36 @@ function getColorName(arguments) {
   }
 }
 
-function canvasLocator(x,y,canvasX,canvasY) {
+function canvasLocator(arguments,canvasX,canvasY) {
+  var x,y;
+  var isNum1 = false;
+  var isNum2 = false;
+  for(var i=0;i<arguments.length;i++) {
+    a = arguments[i];
+    if(!isNum1 && !isNum2 && !(typeof(a)).localeCompare('number')) {
+      x = a;
+      isNum1 = true;
+    } else if (isNum1 && !isNum2 && !(typeof(a)).localeCompare('number')) {
+      y = a;
+      isNum2 = true;
+    }
+  }
   if(x<0.4*canvasX) {
     if(y<0.4*canvasY) {
       return 'top left';
     }
-    else if(y>0.8*canvasY) {
+    else if(y>0.6*canvasY) {
       return 'bottom left';
     }
     else {
       return 'mid left';
     }
   }
-  else if(x>0.8*canvasX) {
+  else if(x>0.6*canvasX) {
     if(y<0.4*canvasY) {
       return 'top right';
     }
-    else if(y>0.8*canvasY) {
+    else if(y>0.6*canvasY) {
       return 'bottom right';
     }
     else {
@@ -97,7 +118,7 @@ function canvasLocator(x,y,canvasX,canvasY) {
     if(y<0.4*canvasY) {
       return 'top middle';
     }
-    else if(y>0.8*canvasY) {
+    else if(y>0.6*canvasY) {
       return 'bottom middle';
     }
     else {
@@ -158,24 +179,34 @@ function populateTable(x,arguments, object ,table, isDraw) {
   if(isDraw && objectCount < 1) {
     table.innerHTML = ''
   };
+  if(!isDraw) {
+    //check for special function in setup -> createCanvas
+    if(!x.name.localeCompare('createCanvas')) {
+      canvasDetails.width = arguments[0];
+      canvasDetails.height = arguments[1];
+    }
+  }
+  //check for speacial functions in general -> background/fill
   if(!x.name.localeCompare('fill')) {
     currentColor = getColorName(arguments);
+  }
+  else if(!x.name.localeCompare('background')) {
+    bgColor = getColorName(arguments);
   }
   else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
 
   if(!x.module.localeCompare('Typography')) {
-      var canvasLocation = canvasLocator(arguments[1], arguments[2],width,height);
+      var canvasLocation = canvasLocator(arguments ,width,height);
     } else {
-      var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
+      var canvasLocation = canvasLocator(arguments ,width,height);
     }
-
 
   objectArray[objectCount] = {
       'type' : x.name,
       'location': canvasLocation,
       'colour': currentColor
     };
-
+    //add the object(shape/text) parameters in objectArray
     for(var i=0;i<arguments.length;i++) {
       if(!(typeof(arguments[i])).localeCompare('number')){
         arguments[i] = round(arguments[i]);
@@ -188,6 +219,7 @@ function populateTable(x,arguments, object ,table, isDraw) {
     else {
       objectTypeCount[x.name]=1;
     }
+    //creating the table to contain the object(shape/text) details
     var row = document.createElement('tr');
     var properties =  Object.keys(objectArray[objectCount]);
     for(var i =0;i<properties.length;i++) {
@@ -206,9 +238,18 @@ function populateTable(x,arguments, object ,table, isDraw) {
 }
 
 function getSummary(object1, object2, element) {
-  if(object2.objectCount>0) {
+  if(object2.objectCount>0 ) {
     var totalCount = object1.objectCount + object2.objectCount;
-    element.innerHTML = 'This canvas contains ' + totalCount + ' shapes. The shapes are ';
+    element.innerHTML = '';
+    element.innerHTML += 'Canvas size is ' + canvasDetails.width + ' by ' + canvasDetails.height + ' pixels ';
+    element.innerHTML += ' and has a background colour of ' + bgColor + '. ';
+    element.innerHTML += 'This canvas contains ' + totalCount;
+    if(totalCount > 1 ) {
+      element.innerHTML += ' objects. The objects are ';
+    }
+    else {
+      element.innerHTML += ' object. The object is ';
+    }
     totObjectTypeCount = MergeObjRecursive(object1.objectTypeCount, object2.objectTypeCount);
     var keys = Object.keys(totObjectTypeCount);
     for(var i=0;i<keys.length;i++) {

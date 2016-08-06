@@ -1,6 +1,3 @@
-var inDraw = false;
-var currentFrame = 0;
-var currentColor = 'white';
 var shadowDOMElement;
 var canvasLocation ='';
 
@@ -42,6 +39,7 @@ funcNames.forEach(function(x){
 
     if(frameCount == 0) { //for setup
       setupObject = populateTable(x,arguments, setupObject,  document.getElementById('shadowDOM-content-details-setup'),false)
+      // getSummary(setupObject,drawObject,document.getElementById('shadowDOM-content-summary'));
     }
 
     else if(frameCount%100 == 0 ) {
@@ -50,9 +48,7 @@ funcNames.forEach(function(x){
     //reset some of the variables
     else if(frameCount%100 == 1 ) {
       getSummary(setupObject,drawObject,document.getElementById('shadowDOM-content-summary'));
-      // drawObject = clearVariables(drawObject);
-      drawObject.objectTypeCount = {};
-      drawObject.objectCount = 0;
+      drawObject = clearVariables(drawObject);
     }
     return originalFunc.apply(this,arguments);
   }
