@@ -1,31 +1,20 @@
-// console.log('a test comment');
 var inDraw = false;
 var currentFrame = 0;
 var currentColor = 'white';
 var shadowDOMElement;
 var canvasLocation ='';
 
-//variables to check objects present in the canvas
-var objectArray = [];
-var objectCount = 0;
-var objectTypeCount = {};
-
 //temp variables for objects(??)
-var tempObjectArray = [];
-var tempObjectCount = 0;
-var tempObjectTypeCount = {};
+var drawObject = {};
+var drawObjectArray = [];
+var drawObjectCount = 0;
+var drawObjectTypeCount = {};
 
 //for object in setpu (??)
+var setupObject = {};
 var setupObjectArray = [];
 var setupObjectCount = 0;
 var setupObjectTypeCount = {};
-const BLACKLIST = [
-  'createCanvas',
-  'color'
-  // 'text'
-  // 'fill'
-];
-
 
 funcNames = refData["classitems"].map(function(x){
   return {
@@ -39,7 +28,7 @@ funcNames = refData["classitems"].map(function(x){
 
 funcNames = funcNames.filter(function(x) {
   let className = x["class"];
-  return (x["name"] && x["params"] && (className==='p5') && (BLACKLIST.indexOf(x["name"])<0) );
+  return (x["name"] && x["params"] && (className==='p5'));
 })
 
 
@@ -52,113 +41,88 @@ funcNames.forEach(function(x){
     }
 
     if(frameCount == 0) { //for setup
-      if(!x.name.localeCompare('fill')) {
-        currentColor = getColorName(arguments);
-      }
-      else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
-        // console.log('the object you are drawing is a - ' + x.name + ' of colour ' + currentColor +  ' of type ' + x.module);
-        if(!x.module.localeCompare('Typography')) {
-          var canvasLocation = canvasLocator(arguments[1], arguments[2],width,height);
-        } else {
-          var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
-        }
-
-        // console.log('the object starts in the ' + canvasLocation +  ' of the canvas.');
-        setupObjectArray[setupObjectCount] = {
-          'type' : x.name,
-          'location': canvasLocation,
-          'colour': currentColor
-        };
-        for(var i=0;i<arguments.length;i++) {
-          if(!(typeof(arguments[i])).localeCompare('number')){
-            arguments[i] = round(arguments[i]);
-          }
-          setupObjectArray[setupObjectCount][x.params[i].description]=arguments[i];
-        }
-        if(setupObjectTypeCount[x.name]) {
-          setupObjectTypeCount[x.name]++;
-        }
-        else {
-          setupObjectTypeCount[x.name]=1;
-        }
-        var table = document.getElementById('shadowDOM-content-details-setup');
-        var row = document.createElement('tr');
-        var properties =  Object.keys(setupObjectArray[setupObjectCount]);
-        for(var i =0;i<properties.length;i++) {
-          var col = document.createElement('td');
-          col.innerHTML = properties[i] + ' : ' + setupObjectArray[setupObjectCount][properties[i]];
-          row.appendChild(col);
-        }
-        table.appendChild(row);
-        setupObjectCount++;
-      }
+      setupObject = populateTable(x,arguments, setupObjectCount,setupObjectArray, setupObjectTypeCount,  document.getElementById('shadowDOM-content-details-setup'),false)
+      setupObjectCount = setupObject.objectCount;
+      setupObjectArray = setupObject.objectArray;
+      setupObjectTypeCount = setupObject.objectTypeCount;
     }
 
     else if(frameCount%100 == 0 ) {
-      if(!x.name.localeCompare('fill')) {
-        currentColor = getColorName(arguments);
-      }
-      else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
-
-        if(tempObjectCount==0) {
-
-          var table = document.getElementById('shadowDOM-content-details-draw');
-          table.innerHTML = '';
-        }
-        if(!x.module.localeCompare('Typography')) {
-          var canvasLocation = canvasLocator(arguments[1], arguments[2],width,height);
-        } else {
-          var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
-        }
-        tempObjectArray[tempObjectCount] = {
-          'type' : x.name,
-          'location': canvasLocation,
-          'colour': currentColor
-        };
-        for(var i=0;i<arguments.length;i++) {
-          if(!(typeof(arguments[i])).localeCompare('number')){
-            arguments[i] = round(arguments[i]);
-          }
-          tempObjectArray[tempObjectCount][x.params[i].description]=arguments[i];
-        }
-        if(tempObjectTypeCount[x.name]) {
-          tempObjectTypeCount[x.name]++;
-        }
-        else {
-          tempObjectTypeCount[x.name]=1;
-        }
-        var table = document.getElementById('shadowDOM-content-details-draw');
-        var row = document.createElement('tr');
-        var properties =  Object.keys(tempObjectArray[tempObjectCount]);
-        for(var i =0;i<properties.length;i++) {
-          var col = document.createElement('td');
-          col.innerHTML = properties[i] + ' : ' + tempObjectArray[tempObjectCount][properties[i]];
-          row.appendChild(col);
-        }
-        table.appendChild(row);
-        tempObjectCount++;
-      }
+      drawObject = populateTable(x,arguments, drawObjectCount,drawObjectArray, drawObjectTypeCount, document.getElementById('shadowDOM-content-details-draw'),true)
+      drawObjectCount = drawObject.objectCount;
+      drawObjectArray = drawObject.objectArray;
+      drawObjectTypeCount = drawObject.objectTypeCount;
     }
     //reset some of the variables
     else if(frameCount%100 == 1 ) {
-      if(tempObjectCount>0) {
+      if(drawObjectCount>0) {
         var overview = document.getElementById('shadowDOM-content-summary');
-        var totalCount = tempObjectCount + setupObjectCount;
+        var totalCount = drawObjectCount + setupObjectCount;
         overview.innerHTML = 'This canvas contains ' + totalCount + ' shapes. The shapes are ';
-        totObjectTypeCount = MergeObjRecursive(tempObjectTypeCount, setupObjectTypeCount);
+        totObjectTypeCount = MergeObjRecursive(drawObjectTypeCount, setupObjectTypeCount);
         var keys = Object.keys(totObjectTypeCount);
         for(var i=0;i<keys.length;i++) {
-          overview.innerHTML = overview.innerHTML.concat( tempObjectTypeCount[keys[i]] + ' ' + keys[i] + ' ');
+          overview.innerHTML = overview.innerHTML.concat( drawObjectTypeCount[keys[i]] + ' ' + keys[i] + ' ');
         }
       }
-
-        tempObjectTypeCount = {};
-        tempObjectCount = 0;
+        drawObjectTypeCount = {};
+        drawObjectCount = 0;
     }
     return originalFunc.apply(this,arguments);
   }
 });
 
+function populateTable(x,arguments, objectCount,objectArray, objectTypeCount,table, isDraw) {
+
+  if(isDraw && objectCount < 1) {
+    table.innerHTML = ''
+  };
+  if(!x.name.localeCompare('fill')) {
+    currentColor = getColorName(arguments);
+  }
+  else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
+
+  if(!x.module.localeCompare('Typography')) {
+      var canvasLocation = canvasLocator(arguments[1], arguments[2],width,height);
+    } else {
+      var canvasLocation = canvasLocator(arguments[0], arguments[1],width,height);
+    }
+
+
+  objectArray[objectCount] = {
+      'type' : x.name,
+      'location': canvasLocation,
+      'colour': currentColor
+    };
+
+    for(var i=0;i<arguments.length;i++) {
+      if(!(typeof(arguments[i])).localeCompare('number')){
+        arguments[i] = round(arguments[i]);
+      }
+      objectArray[objectCount][x.params[i].description]=arguments[i];
+    }
+    if(objectTypeCount[x.name]) {
+      objectTypeCount[x.name]++;
+    }
+    else {
+      objectTypeCount[x.name]=1;
+    }
+    var row = document.createElement('tr');
+    var properties =  Object.keys(objectArray[objectCount]);
+    for(var i =0;i<properties.length;i++) {
+      var col = document.createElement('td');
+      col.innerHTML = properties[i] + ' : ' + objectArray[objectCount][properties[i]];
+      row.appendChild(col);
+    }
+    table.appendChild(row);
+    objectCount++;
+  }
+  return ({
+    'objectCount' : objectCount,
+    'objectArray' : objectArray,
+    'objectTypeCount' : objectTypeCount
+  });
+}
 
 /*** PSUEDO CODE
 
