@@ -92,6 +92,7 @@ function canvasLocator(arguments,canvasX,canvasY) {
       isNum2 = true;
     }
   }
+
   if(x<0.4*canvasX) {
     if(y<0.4*canvasY) {
       return 'top left';
@@ -126,35 +127,6 @@ function canvasLocator(arguments,canvasX,canvasY) {
     }
   }
 }
-
-if(Array.prototype.equals)
-    console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
-// attach the .equals method to Array's prototype to call it on any array
-Array.prototype.equals = function (array) {
-    // if the other array is a falsy value, return
-    if (!array)
-        return false;
-
-    // compare lengths - can save a lot of time
-    if (this.length != array.length)
-        return false;
-
-    for (var i = 0, l=this.length; i < l; i++) {
-        // Check if we have nested arrays
-        if (this[i] instanceof Array && array[i] instanceof Array) {
-            // recurse into the nested arrays
-            if (!this[i].equals(array[i]))
-                return false;
-        }
-        else if (this[i] != array[i]) {
-            // Warning - two different object instances will never be equal: {x:20} != {x:20}
-            return false;
-        }
-    }
-    return true;
-}
-// Hide method from for-in loops
-Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
 function MergeObjRecursive(obj1, obj2) {
   var obj3 = {};
@@ -253,7 +225,20 @@ function getSummary(object1, object2, element) {
     totObjectTypeCount = MergeObjRecursive(object1.objectTypeCount, object2.objectTypeCount);
     var keys = Object.keys(totObjectTypeCount);
     for(var i=0;i<keys.length;i++) {
-      element.innerHTML = element.innerHTML.concat( totObjectTypeCount[keys[i]] + ' ' + keys[i] + ' ');
+      element.innerHTML += totObjectTypeCount[keys[i]] + ' ' + keys[i] + ' ';
+    }
+    element.innerHTML += "<br>";
+    for(var i=0; i <object1.objectArray.length; i++) {
+      var objKeys = Object.keys(object1.objectArray[i]);
+      for(var j=0;j<objKeys.length;j++) {
+        element.innerHTML += objKeys[j] + ' is ' + object1.objectArray[i][objKeys[j]] + ' ';
+      }
+    }
+    for(var i=0; i <object2.objectArray.length; i++) {
+      var objKeys = Object.keys(object2.objectArray[i]);
+      for(var j=0;j<objKeys.length;j++) {
+        element.innerHTML += objKeys[j] + ' is ' + object2.objectArray[i][objKeys[j]];
+      }
     }
   }
 }
@@ -263,3 +248,32 @@ function clearVariables(object) {
   object.objectCount = 0;
   return object;
 }
+
+if(Array.prototype.equals)
+    console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+// attach the .equals method to Array's prototype to call it on any array
+Array.prototype.equals = function (array) {
+    // if the other array is a falsy value, return
+    if (!array)
+        return false;
+
+    // compare lengths - can save a lot of time
+    if (this.length != array.length)
+        return false;
+
+    for (var i = 0, l=this.length; i < l; i++) {
+        // Check if we have nested arrays
+        if (this[i] instanceof Array && array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i]))
+                return false;
+        }
+        else if (this[i] != array[i]) {
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;
+        }
+    }
+    return true;
+}
+// Hide method from for-in loops
+Object.defineProperty(Array.prototype, "equals", {enumerable: false});
