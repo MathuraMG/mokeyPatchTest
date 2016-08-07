@@ -33,15 +33,11 @@ function createShadowDOMElement() {
   details.id = "shadowDOM-content-details";
   section.appendChild(details);
 
-  var setupTable = document.createElement('table');
-  setupTable.id="shadowDOM-content-details-setup";
-  setupTable.setAttribute('summary','details of object in setup');
+  var contentTable = document.createElement('table');
+  contentTable.id="shadowDOM-content-details";
+  contentTable.setAttribute('summary','details of object in the canvas');
 
-  var drawTable = document.createElement('table');
-  drawTable.id="shadowDOM-content-details-draw";
-  drawTable.setAttribute('summary','details of object in draw');
-  details.appendChild(setupTable);
-  details.appendChild(drawTable);
+  details.appendChild(contentTable);
   shadowDOMElement = document.getElementById('shadowDOM-content');
 }
 
@@ -144,13 +140,10 @@ function MergeObjRecursive(obj1, obj2) {
   return obj3;
 }
 
-function populateTable(x,arguments, object ,table, isDraw) {
+function populateObject(x,arguments, object ,table, isDraw) {
   objectCount = object.objectCount;
   objectArray = object.objectArray;
   objectTypeCount = object.objectTypeCount;
-  if(isDraw && objectCount < 1) {
-    table.innerHTML = ''
-  };
   if(!isDraw) {
     //check for special function in setup -> createCanvas
     if(!x.name.localeCompare('createCanvas')) {
@@ -192,14 +185,7 @@ function populateTable(x,arguments, object ,table, isDraw) {
       objectTypeCount[x.name]=1;
     }
     //creating the table to contain the object(shape/text) details
-    var row = document.createElement('tr');
-    var properties =  Object.keys(objectArray[objectCount]);
-    for(var i =0;i<properties.length;i++) {
-      var col = document.createElement('td');
-      col.innerHTML = properties[i] + ' : ' + objectArray[objectCount][properties[i]];
-      row.appendChild(col);
-    }
-    table.appendChild(row);
+
     objectCount++;
   }
   return ({
@@ -209,6 +195,18 @@ function populateTable(x,arguments, object ,table, isDraw) {
   });
 }
 
+function populateTable(table, object) {
+  for(var j =0;j<object.objectArray.length;j++) {
+    var row = document.createElement('tr');
+    var properties =  Object.keys(objectArray[j]);
+    for(var i =0;i<properties.length;i++) {
+      var col = document.createElement('td');
+      col.innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
+      row.appendChild(col);
+    }
+    table.appendChild(row);
+  }
+}
 function getSummary(object1, object2, element) {
   if(object2.objectCount>0 ) {
     var totalCount = object1.objectCount + object2.objectCount;
@@ -237,7 +235,7 @@ function getSummary(object1, object2, element) {
     for(var i=0; i <object2.objectArray.length; i++) {
       var objKeys = Object.keys(object2.objectArray[i]);
       for(var j=0;j<objKeys.length;j++) {
-        element.innerHTML += objKeys[j] + ' is ' + object2.objectArray[i][objKeys[j]];
+        element.innerHTML += objKeys[j] + ' is ' + object2.objectArray[i][objKeys[j]] + ' ';
       }
     }
   }

@@ -38,15 +38,24 @@ funcNames.forEach(function(x){
     }
 
     if(frameCount == 0) { //for setup
-      setupObject = populateTable(x,arguments, setupObject,  document.getElementById('shadowDOM-content-details-setup'),false)
+      setupObject = populateObject(x,arguments, setupObject,  document.getElementById('shadowDOM-content-details'),false);
       // getSummary(setupObject,drawObject,document.getElementById('shadowDOM-content-summary'));
     }
 
     else if(frameCount%100 == 0 ) {
-      drawObject = populateTable(x,arguments, drawObject, document.getElementById('shadowDOM-content-details-draw'),true)
+      // drawObject = MergeObjRecursive(setupObject, drawObject);
+      // setupObject = populateTable(x,arguments, setupObject,  document.getElementById('shadowDOM-content-details'),false);
+      drawObject = populateObject(x,arguments, drawObject, document.getElementById('shadowDOM-content-details'),true);
+      // drawObject = populateTable(document.getElementById('shadowDOM-content-details'),drawObject);
     }
     //reset some of the variables
     else if(frameCount%100 == 1 ) {
+      if(drawObject.objectCount>0){
+        var table = document.getElementById('shadowDOM-content-details');
+        table.innerHTML = '';
+        populateTable(table,setupObject);
+        populateTable(table,drawObject);
+      }
       getSummary(setupObject,drawObject,document.getElementById('shadowDOM-content-summary'));
       drawObject = clearVariables(drawObject);
     }
