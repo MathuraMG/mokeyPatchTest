@@ -2,16 +2,7 @@ var shadowDOMElement;
 var canvasLocation ='';
 
 //for object in setpu (??)
-var setupObject = {
-  objectArray : [],
-  objectCount : 0,
-  objectTypeCount : {}
-};
-var drawObject = {
-  objectArray : [],
-  objectCount : 0,
-  objectTypeCount : {}
-};
+
 
 funcNames = refData["classitems"].map(function(x){
   return {
@@ -34,30 +25,26 @@ funcNames.forEach(function(x){
   p5.prototype[x.name] = function(){
     orgArg = arguments;
     if(!shadowDOMElement){
-      createShadowDOMElement();
+      Interceptor.createShadowDOMElement();
     }
 
     if(frameCount == 0) { //for setup
-      setupObject = populateObject(x,arguments, setupObject,  document.getElementById('shadowDOM-content-details'),false);
-      // getSummary(setupObject,drawObject,document.getElementById('shadowDOM-content-summary'));
+      Interceptor.setupObject = Interceptor.populateObject(x,arguments, Interceptor.setupObject,  document.getElementById('shadowDOM-content-details'),false);
     }
 
     else if(frameCount%100 == 0 ) {
-      // drawObject = MergeObjRecursive(setupObject, drawObject);
-      // setupObject = populateTable(x,arguments, setupObject,  document.getElementById('shadowDOM-content-details'),false);
-      drawObject = populateObject(x,arguments, drawObject, document.getElementById('shadowDOM-content-details'),true);
-      // drawObject = populateTable(document.getElementById('shadowDOM-content-details'),drawObject);
+      Interceptor.drawObject = Interceptor.populateObject(x,arguments, Interceptor.drawObject, document.getElementById('shadowDOM-content-details'),true);
     }
     //reset some of the variables
     else if(frameCount%100 == 1 ) {
-      if(drawObject.objectCount>0){
+      if(Interceptor.drawObject.objectCount>0){
         var table = document.getElementById('shadowDOM-content-details');
         table.innerHTML = '';
-        populateTable(table,setupObject);
-        populateTable(table,drawObject);
+        Interceptor.populateTable(table,Interceptor.setupObject);
+        Interceptor.populateTable(table,Interceptor.drawObject);
       }
-      getSummary(setupObject,drawObject,document.getElementById('shadowDOM-content-summary'));
-      drawObject = clearVariables(drawObject);
+      Interceptor.getSummary(Interceptor.setupObject,Interceptor.drawObject,document.getElementById('shadowDOM-content-summary'));
+      Interceptor.drawObject = Interceptor.clearVariables(Interceptor.drawObject);
     }
     return originalFunc.apply(this,arguments);
   }
