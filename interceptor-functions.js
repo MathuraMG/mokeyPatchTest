@@ -65,6 +65,7 @@ var Interceptor = {
     objectCount : 0,
     objectTypeCount : {}
   },
+  isCleared : false,
   createShadowDOMElement : function() {
 
     // var c = document.getElementsByTagName('canvas')[0];
@@ -180,6 +181,7 @@ var Interceptor = {
   clearVariables : function(object) {
     object.objectTypeCount = {};
     object.objectCount = 0;
+    this.isCleared = true;
     return object;
   },
 
@@ -248,18 +250,20 @@ var Interceptor = {
   },
 
   getSummary : function(object1, object2, element) {
-    if(object2.objectCount>0 ) {
-      var totalCount = object1.objectCount + object2.objectCount;
-      element.innerHTML = '';
-      element.innerHTML += 'Canvas size is ' + this.canvasDetails.width + ' by ' + this.canvasDetails.height + ' pixels ';
-      element.innerHTML += ' and has a background colour of ' + this.bgColor + '. ';
-      element.innerHTML += 'This canvas contains ' + totalCount;
-      if(totalCount > 1 ) {
-        element.innerHTML += ' objects. The objects are ';
-      }
-      else {
-        element.innerHTML += ' object. The object is ';
-      }
+    var totalCount = object1.objectCount + object2.objectCount;
+    element.innerHTML = '';
+    element.innerHTML += 'Canvas size is ' + this.canvasDetails.width + ' by ' + this.canvasDetails.height + ' pixels ';
+    element.innerHTML += ' and has a background colour of ' + this.bgColor + '. ';
+    element.innerHTML += 'This canvas contains ' + totalCount;
+    if(totalCount > 1 ) {
+      element.innerHTML += ' objects. The objects are ';
+    }
+    else {
+      element.innerHTML += ' object. The object is ';
+    }
+
+    if(object2.objectCount>0 || object1.objectCount>0 ) {
+
       totObjectTypeCount = MergeObjRecursive(object1.objectTypeCount, object2.objectTypeCount);
       var keys = Object.keys(totObjectTypeCount);
       for(var i=0;i<keys.length;i++) {
