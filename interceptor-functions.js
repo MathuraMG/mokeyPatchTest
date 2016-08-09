@@ -19,7 +19,6 @@ function MergeObjRecursive(obj1, obj2) {
 }
 
 if(Array.prototype.equals)
-    console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 // attach the .equals method to Array's prototype to call it on any array
 Array.prototype.equals = function (array) {
     // if the other array is a falsy value, return
@@ -75,22 +74,26 @@ var Interceptor = {
 
     var section = document.createElement('section');
     section.id = "shadowDOM-content";
+    section.className = "shadowDOM-content";
     c.appendChild(section);
 
     var summary = document.createElement('div');
     summary.setAttribute("tabIndex","0");
     summary.setAttribute("role","region");
     summary.id = "shadowDOM-content-summary";
+    summary.className = "shadowDOM-content-summary";
     section.appendChild(summary);
 
     var details = document.createElement('div');
     details.setAttribute("tabIndex","0");
     details.setAttribute("role","region");
     details.id = "shadowDOM-content-details";
+    details.className = "shadowDOM-content-details";
     section.appendChild(details);
 
     var contentTable = document.createElement('table');
-    contentTable.id="shadowDOM-content-details";
+    contentTable.id="shadowDOM-content-table";
+    contentTable.className ="shadowDOM-content-table";
     contentTable.setAttribute('summary','details of object in the canvas');
 
     details.appendChild(contentTable);
