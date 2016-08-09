@@ -53,3 +53,15 @@ tr, td, th{
   display: block;
   width:20%;
 }
+
+.source-link {
+  display: block;
+  text-decoration: none;
+  font-size: 12px;
+  margin: 25px 0;
+  color: #888888;
+}
+
+.source-link:hover {
+  color: #a74000;
+}
