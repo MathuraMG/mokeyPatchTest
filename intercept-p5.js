@@ -37,16 +37,16 @@ funcNames.forEach(function(x){
 
     else if(frameCount%100 == 0 ) {
       Interceptor.drawObject = Interceptor.populateObject(x,arguments, Interceptor.drawObject, document.getElementById('shadowDOM-content-details'),true);
-      Interceptor.getSummary(Interceptor.setupObject,Interceptor.drawObject,document.getElementById('shadowDOM-content-summary'));
+
       Interceptor.isCleared = false;
     }
     //reset some of the variables
     else if(frameCount%100 == 1 ) {
       if(!Interceptor.isCleared){
         var table = document.getElementById('shadowDOM-content-details');
-        table.innerHTML = '';
-        Interceptor.populateTable(table,Interceptor.setupObject);
-        Interceptor.populateTable(table,Interceptor.drawObject);
+        Interceptor.getSummary(Interceptor.setupObject,Interceptor.drawObject,document.getElementById('shadowDOM-content-summary'));
+        Interceptor.populateTable(table,Interceptor.setupObject.objectArray.concat(Interceptor.drawObject.objectArray));
+        // Interceptor.populateTable(table,Interceptor.drawObject.objectArray);
       }
       Interceptor.drawObject = Interceptor.clearVariables(Interceptor.drawObject);
     }

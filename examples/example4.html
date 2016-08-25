@@ -30,6 +30,11 @@
     function draw() {
     //The screen
     background(128);
+    fill(255);
+    if(frameCount<1000||frameCount>1300){
+        text(frameCount,20,20);
+    }
+
 
     // The bouncing balls
     for(var i =0;i<balls.length;i++)
