@@ -31,7 +31,6 @@ funcNames.forEach(function(x){
       Interceptor.setupObject = Interceptor.populateObject(x,arguments, Interceptor.setupObject,  document.getElementById('shadowDOM-content-details'),false);
       Interceptor.getSummary(Interceptor.setupObject,Interceptor.drawObject,document.getElementById('shadowDOM-content-summary'));
       var table = document.getElementById('shadowDOM-content-details');
-      table.innerHTML = '';
       Interceptor.populateTable(table,Interceptor.setupObject);
     }
 
@@ -43,6 +42,12 @@ funcNames.forEach(function(x){
     //reset some of the variables
     else if(frameCount%100 == 1 ) {
       if(!Interceptor.isCleared){
+        var cells = document.getElementsByClassName('shadowDOM-cell-content');
+        console.log(cells);
+        for( i =0;i<cells.length;i++) {
+          console.log('making blan');
+          cells[i].innerHTML = '';
+        }
         var table = document.getElementById('shadowDOM-content-details');
         Interceptor.getSummary(Interceptor.setupObject,Interceptor.drawObject,document.getElementById('shadowDOM-content-summary'));
         Interceptor.populateTable(table,Interceptor.setupObject.objectArray.concat(Interceptor.drawObject.objectArray));

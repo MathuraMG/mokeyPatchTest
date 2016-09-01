@@ -67,6 +67,8 @@ var Interceptor = {
     objectTypeCount : {}
   },
   isCleared : false,
+  noRows: 4,
+  noCols: 4,
   createShadowDOMElement : function() {
 
     // var c = document.getElementsByTagName('canvas')[0];
@@ -98,6 +100,17 @@ var Interceptor = {
     contentTable.className ="shadowDOM-content-table";
     contentTable.setAttribute('summary','details of object in the canvas');
 
+    for(var i=0; i<this.noRows; i++) {
+      var row = document.createElement('tr');
+
+      for(var j=0; j<this.noCols; j++) {
+        var col = document.createElement('td');
+        col.className = "shadowDOM-cell-content";
+        col.innerHTML = 'test';
+        row.appendChild(col);
+      }
+      contentTable.appendChild(row);
+    }
     details.appendChild(contentTable);
     shadowDOMElement = document.getElementById('shadowDOM-content');
   },
@@ -133,9 +146,9 @@ var Interceptor = {
       }
     }
   },
-
   canvasLocator : function(arguments,canvasX,canvasY){
-    var x,y;
+    var x, y;
+    var locX, locY;
     var isNum1 = false;
     var isNum2 = false;
     for(var i=0;i<arguments.length;i++) {
@@ -149,39 +162,36 @@ var Interceptor = {
       }
     }
 
-    if(x<0.4*canvasX) {
-      if(y<0.4*canvasY) {
-        return 'top left';
-      }
-      else if(y>0.6*canvasY) {
-        return 'bottom left';
-      }
-      else {
-        return 'mid left';
-      }
+    if(x<=0.25*canvasX) {
+      locX = 0;
     }
-    else if(x>0.6*canvasX) {
-      if(y<0.4*canvasY) {
-        return 'top right';
-      }
-      else if(y>0.6*canvasY) {
-        return 'bottom right';
-      }
-      else {
-        return 'mid right';
-      }
+    else if(x<=0.5*canvasX) {
+      locX = 1;
+    }
+    else if(x<=0.75*canvasX) {
+      locX = 2;
     }
     else {
-      if(y<0.4*canvasY) {
-        return 'top middle';
-      }
-      else if(y>0.6*canvasY) {
-        return 'bottom middle';
-      }
-      else {
-        return 'middle';
-      }
+      locX = 3;
     }
+
+    if(y<=0.25*canvasY) {
+      locY = 0;
+    }
+    else if(y<=0.5*canvasY) {
+      locY = 1;
+    }
+    else if(y<=0.75*canvasY) {
+      locY = 2;
+    }
+    else {
+      locY = 3;
+    }
+    return({
+      locX: locX,
+      locY: locY
+    })
+
   },
   clearVariables : function(object) {
     object.objectTypeCount = {};
@@ -189,7 +199,6 @@ var Interceptor = {
     this.isCleared = true;
     return object;
   },
-
   populateObject : function(x,arguments, object ,table, isDraw) {
     objectCount = object.objectCount;
     objectArray = object.objectArray;
@@ -240,87 +249,17 @@ var Interceptor = {
       objectTypeCount : objectTypeCount
     });
   },
-
   populateTable : function(table, objectArray) {
     if(this.totalCount<100) {
-      console.log(this.prevTotalCount + ' -- ' + this.totalCount);
-
-      if(this.prevTotalCount > this.totalCount) {
-        for(var j =0;j<this.totalCount;j++) {
-          var row = table.children[j];
-          var tempCol = row.children.length;
-          var properties =  Object.keys(objectArray[j]);
-
-          if(tempCol<properties.length){ //ie - there are more cols now
-            for(var i =0;i<tempCol;i++) {
-              row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
-            }
-            for(var i=tempCol;i < properties.length;i++) {
-              var col = document.createElement('td');
-              col.innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
-              row.appendChild(col);
-            }
-          }
-
-          else{ // ie - there are fewer cols now
-            for(var i =0;i<properties.length;i++) {
-              row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
-            }
-            for(var i=properties.length;i<tempCol;i++) {
-              var tempCol = row.children[i];
-              row.removeChild(tempCol);
-            }
-          }
-
-        }
-        for(var j = this.totalCount;j<this.prevTotalCount;j++) {
-          var tempRow = table.children[j];
-          table.removeChild(tempRow);
-        }
-      } else if(this.prevTotalCount <= this.totalCount) {
-        for(var j =0;j<this.prevTotalCount;j++) {
-          var row = table.children[j];
-          var tempCol = row.children.length;
-          var properties =  Object.keys(objectArray[j]);
-
-          if(tempCol<properties.length){ //ie - there are more cols now
-            for(var i =0;i<=tempCol;i++) {
-              row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
-            }
-            for(var i=tempCol;i < properties.length;i++) {
-              var col = document.createElement('td');
-              col.innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
-              row.appendChild(col);
-            }
-          }
-
-          else{ // ie - there are fewer cols now
-            for(var i =0;i<properties.length;i++) {
-              console.log(row);
-              row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
-            }
-            for(var i=properties.length;i<tempCol;i++) {
-              var tempCol = row.children[i];
-              row.removeChild(tempCol);
-            }
-          }
-        }
-        for(var j = this.prevTotalCount;j<this.totalCount;j++) {
-          var row = document.createElement('tr');
-          console.log(objectArray);
-          var properties =  Object.keys(objectArray[j]);
-          for(var i =0;i<properties.length;i++) {
-            var col = document.createElement('td');
-            col.innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
-            row.appendChild(col);
-          }
-          table.appendChild(row);
-        }
+      console.log(objectArray);
+      for(var i=0;i<objectArray.length;i++) {
+        console.log(objectArray[i].location);
+        var cellLoc = objectArray[i].location.locY*this.noRows + objectArray[i].location.locX;
+        document.getElementsByClassName('shadowDOM-cell-content')[cellLoc].innerHTML += objectArray[i].colour + ' ' + objectArray[i].type;
       }
 
     }
   },
-
   getSummary : function(object1, object2, element) {
     this.prevTotalCount = this.totalCount;
     this.totalCount = object1.objectCount + object2.objectCount;
@@ -361,5 +300,4 @@ var Interceptor = {
 
     }
   }
-
 };
