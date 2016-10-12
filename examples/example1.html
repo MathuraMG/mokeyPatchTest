@@ -17,7 +17,9 @@
 	<div id="canvas-sub"></div>
     <script>
       function setup() {
-        createCanvas(400, 400);
+        Heading = createElement('h2','Example 1 - Shapes on canvas');
+        canvas = createCanvas(400, 400);
+        canvas.attribute('title','grey canvas with multiple shapes - a red circle, green square and blue triangle');
       }
 
       function draw() {
