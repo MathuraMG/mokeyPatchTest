@@ -32,7 +32,7 @@ funcNames.forEach(function(x){
       Interceptor.getSummary(Interceptor.setupObject,Interceptor.drawObject,document.getElementById('shadowDOM-content-summary'));
       var table = document.getElementById('shadowDOM-content-details');
       table.innerHTML = '';
-      Interceptor.populateTable(table,Interceptor.setupObject);
+      Interceptor.populateTable(table,Interceptor.setupObject.objectArray);
     }
 
     else if(frameCount%100 == 0 ) {

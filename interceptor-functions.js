@@ -52,6 +52,8 @@ var Interceptor = {
   totalCount : 0,
   currentColor : 'white',
   bgColor : 'white',
+  objectArea : 0,
+  coordinates : [],
   canvasDetails : {
     width : 0,
     height: 0
@@ -209,20 +211,32 @@ var Interceptor = {
       this.bgColor = this.getColorName(arguments);
     }
     else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
+      this.objectArea = this.getObjectArea(x.name, arguments);
+      var canvasLocation = this.canvasLocator(arguments ,width,height);
 
-    var canvasLocation = this.canvasLocator(arguments ,width,height);
-
-    objectArray[objectCount] = {
-        'type' : x.name,
+      objectArray[objectCount] = {
+        'type' : this.currentColor + ' ' + x.name ,
         'location': canvasLocation,
-        'colour': this.currentColor
+        // 'colour': this.currentColor,
+        'area': this.objectArea,
+        'co-ordinates': this.coordinates
       };
+      this.coordinates = [];
+
       //add the object(shape/text) parameters in objectArray
       for(var i=0;i<arguments.length;i++) {
         if(!(typeof(arguments[i])).localeCompare('number')){
           arguments[i] = round(arguments[i]);
         }
-        objectArray[objectCount][x.params[i].description]=arguments[i];
+        if(x.params[i].description.indexOf("x-coordinate")>-1) {
+          this.coordinates.push(arguments[i]+'x')
+        }
+        else if(x.params[i].description.indexOf("y-coordinate")>-1) {
+          this.coordinates.push(arguments[i]+'y')
+        }
+        else{
+          objectArray[objectCount][x.params[i].description]=arguments[i];
+        }
       }
       if(objectTypeCount[x.name]) {
         objectTypeCount[x.name]++;
@@ -243,13 +257,19 @@ var Interceptor = {
 
   populateTable : function(table, objectArray) {
     if(this.totalCount<100) {
-      console.log(this.prevTotalCount + ' -- ' + this.totalCount);
-
       if(this.prevTotalCount > this.totalCount) {
         for(var j =0;j<this.totalCount;j++) {
           var row = table.children[j];
           var tempCol = row.children.length;
           var properties =  Object.keys(objectArray[j]);
+
+          // var col = document.createElement('td');
+          // col.innerHTML = objectArray[j]["colour"] + ' ' + objectArray[j]["type"];
+          // row.appendChild(col);
+          //
+          // var col = document.createElement('td');
+          // col.innerHTML = "Area = " + objectArray[j]["area"]
+          // row.appendChild(col);
 
           if(tempCol<properties.length){ //ie - there are more cols now
             for(var i =0;i<tempCol;i++) {
@@ -263,7 +283,7 @@ var Interceptor = {
           }
 
           else{ // ie - there are fewer cols now
-            for(var i =0;i<properties.length;i++) {
+            for(var i =minCols;i<properties.length;i++) {
               row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
             }
             for(var i=properties.length;i<tempCol;i++) {
@@ -284,7 +304,7 @@ var Interceptor = {
           var properties =  Object.keys(objectArray[j]);
 
           if(tempCol<properties.length){ //ie - there are more cols now
-            for(var i =0;i<=tempCol;i++) {
+            for(var i =minCols;i<=tempCol;i++) {
               row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
             }
             for(var i=tempCol;i < properties.length;i++) {
@@ -296,7 +316,6 @@ var Interceptor = {
 
           else{ // ie - there are fewer cols now
             for(var i =0;i<properties.length;i++) {
-              console.log(row);
               row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
             }
             for(var i=properties.length;i<tempCol;i++) {
@@ -304,10 +323,10 @@ var Interceptor = {
               row.removeChild(tempCol);
             }
           }
+
         }
         for(var j = this.prevTotalCount;j<this.totalCount;j++) {
           var row = document.createElement('tr');
-          console.log(objectArray);
           var properties =  Object.keys(objectArray[j]);
           for(var i =0;i<properties.length;i++) {
             var col = document.createElement('td');
@@ -319,6 +338,34 @@ var Interceptor = {
       }
 
     }
+  },
+
+  getObjectArea : function(objectType,arguments){
+    var objectArea = 0;
+    if(!objectType.localeCompare('arc')) {
+      objectArea = 0;
+    }
+    else if(!objectType.localeCompare('ellipse')) {
+      objectArea = 3.14 * arguments[2]*arguments[3]/4;
+    }
+    else if(!objectType.localeCompare('line')) {
+      objectArea = 0;
+    }
+    else if(!objectType.localeCompare('point')) {
+      objectArea = 0;
+    }
+    else if(!objectType.localeCompare('quad')) {
+      //x1y2+x2y3+x3y4+x4y1−x2y1−x3y2−x4y3−x1y4
+      objectArea = (arguments[0]*arguments[1]+arguments[2]*arguments[3]+arguments[4]*arguments[5]+arguments[6]*arguments[7]) - (arguments[2]*arguments[1]+arguments[4]*arguments[3]+arguments[6]*arguments[5]+arguments[0]*arguments[7]);
+    }
+    else if(!objectType.localeCompare('rect')) {
+      objectArea = arguments[2]*arguments[3];
+    }
+    else if(!objectType.localeCompare('triangle')) {
+      objectArea = arguments[0]*(arguments[3] - arguments[5]) + arguments[2]*(arguments[5] - arguments[1]) + arguments[4]*(arguments[1] - arguments[3]);
+      //A	x 	 (	 B	y 	−	 C	y 	) 	+	 B	x 	 (	 C	y 	−	 A	y 	) 	+	 C	x 	 (	 A	y 	−	 B	y 	)
+    }
+    return objectArea;
   },
 
   getSummary : function(object1, object2, element) {
@@ -343,23 +390,30 @@ var Interceptor = {
         element.innerHTML += totObjectTypeCount[keys[i]] + ' ' + keys[i] + ' ';
       }
 
-      element.innerHTML += "<br>";
+      var objectList = document.createElement('ul');
+
       if(this.totalCount<100){
         for(var i=0; i <object1.objectArray.length; i++) {
+          var objectListItem = document.createElement('li');
+          objectListItem.id = 'object' + i;
+          objectList.appendChild(objectListItem);
           var objKeys = Object.keys(object1.objectArray[i]);
           for(var j=0;j<objKeys.length;j++) {
-            element.innerHTML += objKeys[j] + ' is ' + object1.objectArray[i][objKeys[j]] + ' ';
+            objectListItem.innerHTML += objKeys[j] + ' is ' + object1.objectArray[i][objKeys[j]] + ' ';
           }
         }
         for(var i=0; i <object2.objectArray.length; i++) {
+          var objectListItem = document.createElement('li');
+          objectListItem.id = 'object' + (object1.objectArray.length + i);
+          objectList.appendChild(objectListItem);
           var objKeys = Object.keys(object2.objectArray[i]);
           for(var j=0;j<objKeys.length;j++) {
-            element.innerHTML += objKeys[j] + ' is ' + object2.objectArray[i][objKeys[j]] + ' ';
+            objectListItem.innerHTML += objKeys[j] + ' is ' + object2.objectArray[i][objKeys[j]] + ' ';
           }
         }
+        element.appendChild(objectList);
       }
 
     }
   }
-
 };
