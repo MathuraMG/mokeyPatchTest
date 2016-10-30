@@ -54,6 +54,7 @@ var Interceptor = {
   bgColor : 'white',
   objectArea : 0,
   coordinates : [],
+  objectDescription : '',
   canvasDetails : {
     width : 0,
     height: 0
@@ -213,11 +214,15 @@ var Interceptor = {
     else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
       this.objectArea = this.getObjectArea(x.name, arguments);
       var canvasLocation = this.canvasLocator(arguments ,width,height);
-
+      if(x.name.localeCompare('text')){
+        this.objectDescription = x.name;
+      }
+      else {
+        this.objectDescription = arguments[0].substring(0,20);
+      }
       objectArray[objectCount] = {
-        'type' : this.currentColor + ' ' + x.name ,
+        'type' : this.currentColor + ' - ' + this.objectDescription ,
         'location': canvasLocation,
-        // 'colour': this.currentColor,
         'area': this.objectArea,
         'co-ordinates': this.coordinates
       };
@@ -263,28 +268,39 @@ var Interceptor = {
           var tempCol = row.children.length;
           var properties =  Object.keys(objectArray[j]);
 
-          // var col = document.createElement('td');
-          // col.innerHTML = objectArray[j]["colour"] + ' ' + objectArray[j]["type"];
-          // row.appendChild(col);
-          //
-          // var col = document.createElement('td');
-          // col.innerHTML = "Area = " + objectArray[j]["area"]
-          // row.appendChild(col);
-
           if(tempCol<properties.length){ //ie - there are more cols now
             for(var i =0;i<tempCol;i++) {
-              row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
+              if(properties[i].localeCompare('type')) {
+                row.children[i].innerHTML = properties[i] + ' = ' + objectArray[j][properties[i]];
+              }
+              else {
+                row.children[i].innerHTML = objectArray[j][properties[i]];
+              }
+
             }
             for(var i=tempCol;i < properties.length;i++) {
               var col = document.createElement('td');
-              col.innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
+              if(properties[i].localeCompare('type')) {
+                col.children[i].innerHTML = properties[i] + ' = ' + objectArray[j][properties[i]];
+              }
+              else {
+                col.children[i].innerHTML = objectArray[j][properties[i]];
+              }
+
               row.appendChild(col);
             }
           }
 
           else{ // ie - there are fewer cols now
             for(var i =minCols;i<properties.length;i++) {
-              row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
+              console.log(properties[i].localeCompare('type'));
+              if(properties[i].localeCompare('type')) {
+                row.children[i].innerHTML = properties[i] + ' = ' + objectArray[j][properties[i]];
+              }
+              else {
+                row.children[i].innerHTML = objectArray[j][properties[i]];
+              }
+
             }
             for(var i=properties.length;i<tempCol;i++) {
               var tempCol = row.children[i];
@@ -298,25 +314,46 @@ var Interceptor = {
           table.removeChild(tempRow);
         }
       } else if(this.prevTotalCount <= this.totalCount) {
+
         for(var j =0;j<this.prevTotalCount;j++) {
           var row = table.children[j];
           var tempCol = row.children.length;
           var properties =  Object.keys(objectArray[j]);
 
           if(tempCol<properties.length){ //ie - there are more cols now
+
             for(var i =minCols;i<=tempCol;i++) {
-              row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
+              if(properties[i].localeCompare('type')) {
+                row.children[i].innerHTML = properties[i] + ' = ' + objectArray[j][properties[i]];
+              }
+              else {
+                row.children[i].innerHTML = objectArray[j][properties[i]];
+              }
             }
             for(var i=tempCol;i < properties.length;i++) {
               var col = document.createElement('td');
-              col.innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
+
+              if(properties[i].localeCompare('type')) {
+                col.innerHTML = properties[i] + ' = ' + objectArray[j][properties[i]];
+              }
+              else {
+                col.innerHTML = objectArray[j][properties[i]];
+              }
+
               row.appendChild(col);
             }
           }
 
           else{ // ie - there are fewer cols now
+            // console.log('poiuytre');
             for(var i =0;i<properties.length;i++) {
-              row.children[i].innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
+              if(properties[i].localeCompare('type')) {
+                row.children[i].innerHTML = properties[i] + ' = ' + objectArray[j][properties[i]];
+              }
+              else {
+                row.children[i].innerHTML = objectArray[j][properties[i]];
+              }
+
             }
             for(var i=properties.length;i<tempCol;i++) {
               var tempCol = row.children[i];
@@ -327,16 +364,22 @@ var Interceptor = {
         }
         for(var j = this.prevTotalCount;j<this.totalCount;j++) {
           var row = document.createElement('tr');
+          row.id = 'object' + j;
           var properties =  Object.keys(objectArray[j]);
           for(var i =0;i<properties.length;i++) {
             var col = document.createElement('td');
-            col.innerHTML = properties[i] + ' : ' + objectArray[j][properties[i]];
+            if(properties[i].localeCompare('type')) {
+              col.innerHTML = properties[i] + ' = ' + objectArray[j][properties[i]];
+            }
+            else {
+              col.innerHTML = objectArray[j][properties[i]];
+            }
+
             row.appendChild(col);
           }
           table.appendChild(row);
         }
       }
-
     }
   },
 
@@ -372,14 +415,12 @@ var Interceptor = {
     this.prevTotalCount = this.totalCount;
     this.totalCount = object1.objectCount + object2.objectCount;
     element.innerHTML = '';
-    element.innerHTML += 'Canvas size is ' + this.canvasDetails.width + ' by ' + this.canvasDetails.height + ' pixels ';
-    element.innerHTML += ' and has a background colour of ' + this.bgColor + '. ';
-    element.innerHTML += 'This canvas contains ' + this.totalCount;
+    element.innerHTML +=  this.bgColor + ' canvas is ' + this.canvasDetails.width + ' by ' + this.canvasDetails.height + ' of area ' + this.canvasDetails.width*this.canvasDetails.height;
     if(this.totalCount > 1 ) {
-      element.innerHTML += ' objects. The objects are ';
+      element.innerHTML += ' Contains ' + this.totalCount + ' objects - ';
     }
     else {
-      element.innerHTML += ' object. The object is ';
+      element.innerHTML += ' Contains ' + this.totalCount + ' object - ';
     }
 
     if(object2.objectCount>0 || object1.objectCount>0 ) {
@@ -395,21 +436,23 @@ var Interceptor = {
       if(this.totalCount<100){
         for(var i=0; i <object1.objectArray.length; i++) {
           var objectListItem = document.createElement('li');
-          objectListItem.id = 'object' + i;
           objectList.appendChild(objectListItem);
           var objKeys = Object.keys(object1.objectArray[i]);
-          for(var j=0;j<objKeys.length;j++) {
-            objectListItem.innerHTML += objKeys[j] + ' is ' + object1.objectArray[i][objKeys[j]] + ' ';
-          }
+          var objLink = document.createElement('a');
+          objLink.href = "#object" + i;
+          objLink.innerHTML = object1.objectArray[i]['type'];
+          objectListItem.appendChild(objLink);
+          objectListItem.innerHTML += '; area = ' + object1.objectArray[i]['area'] + '; location = ' + object1.objectArray[i]['location'];
         }
         for(var i=0; i <object2.objectArray.length; i++) {
           var objectListItem = document.createElement('li');
-          objectListItem.id = 'object' + (object1.objectArray.length + i);
           objectList.appendChild(objectListItem);
           var objKeys = Object.keys(object2.objectArray[i]);
-          for(var j=0;j<objKeys.length;j++) {
-            objectListItem.innerHTML += objKeys[j] + ' is ' + object2.objectArray[i][objKeys[j]] + ' ';
-          }
+          var objLink = document.createElement('a');
+          objLink.href = "#object" + (i + object1.objectArray.length);;
+          objLink.innerHTML = object2.objectArray[i]['type'];
+          objectListItem.appendChild(objLink);
+          objectListItem.innerHTML +=  '; area = ' + object2.objectArray[i]['area'] + '; location = ' + object2.objectArray[i]['location'];
         }
         element.appendChild(objectList);
       }
