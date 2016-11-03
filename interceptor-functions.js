@@ -1,52 +1,3 @@
-String.prototype.paddingLeft = function (paddingValue) {
-   return String(paddingValue + this).slice(-paddingValue.length);
-};
-
-function MergeObjRecursive(obj1, obj2) {
-  var obj3 = {};
-  for(p in obj1) {
-    obj3[p] = obj1[p];
-  }
-  for(p in obj2) {
-    if(Object.keys(obj3).indexOf(p)<0){
-      obj3[p] = obj2[p];
-    }
-    else {
-      obj3[p] = obj3[p] + obj2[p];
-    }
-  }
-  return obj3;
-}
-
-if(Array.prototype.equals)
-// attach the .equals method to Array's prototype to call it on any array
-Array.prototype.equals = function (array) {
-    // if the other array is a falsy value, return
-    if (!array)
-        return false;
-
-    // compare lengths - can save a lot of time
-    if (this.length != array.length)
-        return false;
-
-    for (var i = 0, l=this.length; i < l; i++) {
-        // Check if we have nested arrays
-        if (this[i] instanceof Array && array[i] instanceof Array) {
-            // recurse into the nested arrays
-            if (!this[i].equals(array[i]))
-                return false;
-        }
-        else if (this[i] != array[i]) {
-            // Warning - two different object instances will never be equal: {x:20} != {x:20}
-            return false;
-        }
-    }
-    return true;
-}
-// Hide method from for-in loops
-Object.defineProperty(Array.prototype, "equals", {enumerable: false});
-
-
 var Interceptor = {
   prevTotalCount :0,
   totalCount : 0,
@@ -137,37 +88,37 @@ var Interceptor = {
     }
   },
 
-  canvasLocator : function(arguments,canvasX,canvasY){
-    var x,y;
-    var isNum1 = false;
-    var isNum2 = false;
+  /* return which part of the canvas an object os present */
+  canvasAreaLocation : function(x,arguments,canvasX,canvasY){
+
+    var x_loc,y_loc;
+
     for(var i=0;i<arguments.length;i++) {
       a = arguments[i];
-      if(!isNum1 && !isNum2 && !(typeof(a)).localeCompare('number')) {
-        x = a;
-        isNum1 = true;
-      } else if (isNum1 && !isNum2 && !(typeof(a)).localeCompare('number')) {
-        y = a;
-        isNum2 = true;
+      if(x.params[i].description.indexOf("x-coordinate")>-1) {
+        x_loc = a;
+      }
+      else if(x.params[i].description.indexOf("y-coordinate")>-1) {
+        y_loc = a;
       }
     }
 
-    if(x<0.4*canvasX) {
-      if(y<0.4*canvasY) {
+    if(x_loc<0.4*canvasX) {
+      if(y_loc<0.4*canvasY) {
         return 'top left';
       }
-      else if(y>0.6*canvasY) {
+      else if(y_loc>0.6*canvasY) {
         return 'bottom left';
       }
       else {
         return 'mid left';
       }
     }
-    else if(x>0.6*canvasX) {
-      if(y<0.4*canvasY) {
+    else if(x_loc>0.6*canvasX) {
+      if(y_loc<0.4*canvasY) {
         return 'top right';
       }
-      else if(y>0.6*canvasY) {
+      else if(y_loc>0.6*canvasY) {
         return 'bottom right';
       }
       else {
@@ -175,10 +126,10 @@ var Interceptor = {
       }
     }
     else {
-      if(y<0.4*canvasY) {
+      if(y_loc<0.4*canvasY) {
         return 'top middle';
       }
-      else if(y>0.6*canvasY) {
+      else if(y_loc>0.6*canvasY) {
         return 'bottom middle';
       }
       else {
@@ -186,6 +137,9 @@ var Interceptor = {
       }
     }
   },
+
+
+
   clearVariables : function(object) {
     object.objectTypeCount = {};
     object.objectCount = 0;
@@ -213,7 +167,7 @@ var Interceptor = {
     }
     else if(!x.module.localeCompare('Shape') || !x.module.localeCompare('Typography') &&((!x.submodule)||(x.submodule.localeCompare('Attributes')!=0)) ){
       this.objectArea = this.getObjectArea(x.name, arguments);
-      var canvasLocation = this.canvasLocator(arguments ,width,height);
+      var canvasLocation = this.canvasAreaLocation(x, arguments ,width,height);
       if(x.name.localeCompare('text')){
         this.objectDescription = x.name;
       }
@@ -234,10 +188,10 @@ var Interceptor = {
           arguments[i] = round(arguments[i]);
         }
         if(x.params[i].description.indexOf("x-coordinate")>-1) {
-          this.coordinates.push(arguments[i]+'x')
+          objectArray[objectCount]['co-ordinates'].push(arguments[i]+'x')
         }
         else if(x.params[i].description.indexOf("y-coordinate")>-1) {
-          this.coordinates.push(arguments[i]+'y')
+          objectArray[objectCount]['co-ordinates'].push(arguments[i]+'y')
         }
         else{
           objectArray[objectCount][x.params[i].description]=arguments[i];
